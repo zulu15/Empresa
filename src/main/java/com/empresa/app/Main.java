@@ -1,31 +1,35 @@
 package com.empresa.app;
 
-import java.sql.Connection;
-import java.util.Collection;
 
-import com.empresa.beans.EmpleadoDTO;
-import com.empresa.interfaces.DepartamentoDAO;
-import com.empresa.interfaces.EmpleadoDAO;
-import com.empresa.util.UConnection;
-import com.empresa.util.UFactory;
+
+import com.empresa.vistas.Inicio;
 
 public class Main {
 
-	public static void main(String[] args) {
-
-//		DepartamentoDAO departamentoService = new DepartamentoImpl();
-//		Collection<DepartamentoDTO> dptos = departamentoService.buscarTodos();
-//		for (DepartamentoDTO departamentoDTO : dptos) {
-//			System.out.println(departamentoDTO);
-//		}
-
-		EmpleadoDAO empleadoService = (EmpleadoDAO) UFactory.getInstancia("EMP");
-
-		Collection<EmpleadoDTO> empleados = empleadoService.buscarXDepartamento(2);
-		for (EmpleadoDTO empleadoDTO : empleados) {
-			System.out.println(empleadoDTO);
-		}
+	/**
+	 * @param args
+	 *            the command line arguments
+	 */
+	public static void main(String args[]) {
 		
+        
+       try {
+           for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+               if ("Nimbus".equals(info.getName())) {
+                   javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                   break;
+               }
+           }
+       } catch (ClassNotFoundException ex) {
+           java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+       } catch (InstantiationException ex) {
+           java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+       } catch (IllegalAccessException ex) {
+           java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+       } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+           java.util.logging.Logger.getLogger(Inicio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+       }
+		Inicio aplicacionInicio = new Inicio();
 	}
 
 }
