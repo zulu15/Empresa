@@ -1,5 +1,7 @@
 package com.empresa.vistas;
 
+
+
 public class Inicio extends javax.swing.JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -12,9 +14,13 @@ public class Inicio extends javax.swing.JFrame {
 	private javax.swing.JMenuItem subMenuFile1;
 	private InternalTabla tabla;
 
+	
 	public Inicio() {
 		initComponents();
+		
 	}
+
+
 
 	private void initComponents() {
 		tabla = new InternalTabla();
