@@ -58,14 +58,11 @@ public class InternalTabla extends javax.swing.JInternalFrame {
 		btnAgregar = new javax.swing.JButton();
 		btnEliminar = new javax.swing.JButton();
 
-		//Atributos de redimension del InternalFrame
+		// Atributos de redimension del InternalFrame
 		setClosable(true);
 		setIconifiable(true);
 		setMaximizable(true);
 		setResizable(true);
-		
-		
-		
 
 		scrollista.setToolTipText("");
 
@@ -77,7 +74,7 @@ public class InternalTabla extends javax.swing.JInternalFrame {
 			tabla.getColumnModel().getColumn(2).setResizable(false);
 		}
 
-		panelInputs.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Departamentos")));
+		panelInputs.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Modificar Departamentos")));
 
 		labelNombre.setFont(new java.awt.Font("Waree", 0, 14)); // NOI18N
 		labelNombre.setText("Nombre ");

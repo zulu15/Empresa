@@ -12,7 +12,8 @@ public class Inicio extends javax.swing.JFrame {
 	private javax.swing.JMenuItem subMenuEdit1;
 	private javax.swing.JMenuItem subMenuEdit2;
 	private javax.swing.JMenuItem subMenuFile1;
-	private InternalTabla tabla;
+	protected static InternalTabla tabla;
+	protected static InternalAdministrador admin;
 
 	
 	public Inicio() {
@@ -23,6 +24,7 @@ public class Inicio extends javax.swing.JFrame {
 
 
 	private void initComponents() {
+		admin = new InternalAdministrador();
 		tabla = new InternalTabla();
 		escritorio = new javax.swing.JDesktopPane();
 		menuBar = new javax.swing.JMenuBar();
@@ -35,7 +37,8 @@ public class Inicio extends javax.swing.JFrame {
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Aplicacion");
 		escritorio.add(tabla);
-		tabla.show();
+		escritorio.add(admin);
+		admin.show();		
 		menuFile.setText("File");
 
 		subMenuFile1.setText("jMenuItem1");
@@ -63,6 +66,7 @@ public class Inicio extends javax.swing.JFrame {
 		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(escritorio, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE));
 
 		pack();
+		setSize(1000, 800);
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}

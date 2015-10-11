@@ -4,14 +4,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.NoSuchAlgorithmException;
+
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.empresa.beans.DepartamentoDTO;
+import com.empresa.beans.UsuarioDTO;
 import com.empresa.interfaces.DepartamentoDAO;
+import com.empresa.interfaces.UsuarioDAO;
 import com.empresa.util.UFactory;
+import com.empresa.util.UHash;
 import com.empresa.util.UTabla;
 
 public class ControladorEventos implements ActionListener, MouseListener {
@@ -19,12 +24,20 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	public static final String BOTON_ACTUALIZAR = "Actualizar Departamento";
 	public static final String BOTON_ELIMINAR = "Eliminar Departamento";
 	public static final String BOTON_AGREGAR = "Nuevo Departamento";
+	public static final String BOTON_LOGIN = "Ingresar";
 	private DepartamentoDAO departamentoService = (DepartamentoDAO) UFactory.getInstancia("DEPT");
+	private UsuarioDAO usuarioService = (UsuarioDAO) UFactory.getInstancia("USR");
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String evento = e.getActionCommand();
 		switch (evento) {
+
+		case BOTON_LOGIN:
+
+			validarLogin();
+
+			break;
 
 		case BOTON_ACTUALIZAR:
 
@@ -51,6 +64,19 @@ public class ControladorEventos implements ActionListener, MouseListener {
 		limpiarInputs();
 	}
 
+	private void validarLogin() {
+		UsuarioDTO usuario = obtenerUsuarioInputs();
+		if (isUsuarioCamposValido(usuario) && existeUsuario(usuario)) {
+			// Mostramos la tabla al usuario
+			Inicio.tabla.show();
+			Inicio.admin.setVisible(false);
+			Inicio.admin.dispose();
+		}else{
+			InternalAdministrador.labelError.setText("Error, usuario o contraseña incorrectos.");
+		}
+
+	}
+
 	private void updateRegistro() {
 		// Obtengo los campos de texto
 		DepartamentoDTO departamento = obtenerDepartamentoInputs();
@@ -73,7 +99,8 @@ public class ControladorEventos implements ActionListener, MouseListener {
 		int row = InternalTabla.tabla.getSelectedRow();
 		// Obtengo el campo fila,0 es decir el primer campo que corresponde al
 		// id
-		if (row > 0) {
+
+		if (row >= 0) {
 			int idEliminar = (int) InternalTabla.tabla.getValueAt(row, 0);
 
 			try {
@@ -82,8 +109,8 @@ public class ControladorEventos implements ActionListener, MouseListener {
 
 				e.printStackTrace();
 			}
-		}else{
-			JOptionPane.showInternalMessageDialog(InternalTabla.panelInputs,"Debe seleccionar un registro", "Eliminar",JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			JOptionPane.showInternalMessageDialog(InternalTabla.panelInputs, "Debe seleccionar un registro", "Eliminar", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
@@ -140,6 +167,24 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	}
 
 	/**
+	 * 
+	 * @return un nuevo usuario a partir de los campos ingresados
+	 */
+	private UsuarioDTO obtenerUsuarioInputs() {
+		UsuarioDTO usuario = new UsuarioDTO();
+		try {
+		String nombre = InternalAdministrador.txtUsuario.getText();
+		String password = InternalAdministrador.txtPassword.getText();
+		String hashPassword = UHash.hash(password);
+		usuario.setNombre(nombre);
+		usuario.setPassword(hashPassword);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return usuario;
+	}
+
+	/**
 	 * Verifica que el departamento no sea nulo y que sus componentes sean
 	 * persistibles
 	 * 
@@ -150,6 +195,15 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	private boolean isDepartamentoValido(DepartamentoDTO departamento) {
 
 		return (departamento.getDname() != null && !departamento.getDname().isEmpty() && departamento.getLoc() != null && !departamento.getLoc().isEmpty() && String.valueOf(departamento.getDeptno()) != null);
+	}
+
+	private boolean isUsuarioCamposValido(UsuarioDTO usuario) {
+
+		return (usuario.getPassword() != null && usuario.getNombre() != null && !usuario.getNombre().isEmpty() && !usuario.getPassword().isEmpty());
+	}
+
+	private boolean existeUsuario(UsuarioDTO usuario) {
+		return (usuarioService.findUsuario(usuario) != null);
 	}
 
 	/**
