@@ -12,4 +12,5 @@ DAOS: "Permite realizar una aplicacion en capas, logrando asi desacoplan cada un
 
 
 Imagenes del proyecto:
-![Alt text](http://oi57.tinypic.com/k98al4.jpg "Title")
+![Alt text](http://oi57.tinypic.com/k98al4.jpg "Tabla")
+![Alt text](http://oi58.tinypic.com/20kfamb.jpg "Login")
