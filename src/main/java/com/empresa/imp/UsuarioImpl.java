@@ -136,10 +136,16 @@ public class UsuarioImpl implements UsuarioDAO {
 		}
 		return usuarioEncontrado;
 	}
-/*
+
 	public static void main(String a[]) {
+		
+		
 		UsuarioDAO service = (UsuarioDAO) UFactory.getInstancia("USR");
-		System.out.println(service.findUsuario(new UsuarioDTO(0, "joaquin", "joaquin1415", 1)));
+		UsuarioDTO usuarioPrueba = new UsuarioDTO(1, "joaquin", "c2f6d50c988c8320a487587a9eb44e77", 1);
+		
+
+
 	}
-*/
+	
+
 }

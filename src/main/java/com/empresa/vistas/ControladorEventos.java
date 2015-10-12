@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.security.NoSuchAlgorithmException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -21,10 +20,13 @@ import com.empresa.util.UTabla;
 
 public class ControladorEventos implements ActionListener, MouseListener {
 
-	public static final String BOTON_ACTUALIZAR = "Actualizar Departamento";
-	public static final String BOTON_ELIMINAR = "Eliminar Departamento";
-	public static final String BOTON_AGREGAR = "Nuevo Departamento";
-	public static final String BOTON_LOGIN = "Ingresar";
+	public static final String BOTON_ACTUALIZAR_DEPARTAMENTO = "Actualizar Departamento";
+	public static final String BOTON_ELIMINAR_DEPARTAMENTO = "Eliminar Departamento";
+	public static final String BOTON_AGREGAR_DEPARTAMENTO = "Nuevo Departamento";
+	public static final String BOTON_LOGIN_USUARIO = "Ingresar";
+	public static final String BOTON_MOSTRAR_DEPARTAMENTOS = "btnAdminDepartamentos";
+	private static UsuarioDTO usuarioActivo = new UsuarioDTO();
+
 	private DepartamentoDAO departamentoService = (DepartamentoDAO) UFactory.getInstancia("DEPT");
 	private UsuarioDAO usuarioService = (UsuarioDAO) UFactory.getInstancia("USR");
 
@@ -33,25 +35,31 @@ public class ControladorEventos implements ActionListener, MouseListener {
 		String evento = e.getActionCommand();
 		switch (evento) {
 
-		case BOTON_LOGIN:
+		case BOTON_MOSTRAR_DEPARTAMENTOS:
 
-			validarLogin();
-
-			break;
-
-		case BOTON_ACTUALIZAR:
-
-			updateRegistro();
+			mostrarDepartamentos();
 
 			break;
 
-		case BOTON_AGREGAR:
+		case BOTON_LOGIN_USUARIO:
 
-			persistirDepartamento();
+			validarLoginUsuario();
 
 			break;
 
-		case BOTON_ELIMINAR:
+		case BOTON_ACTUALIZAR_DEPARTAMENTO:
+
+			actualizarDepartamento();
+
+			break;
+
+		case BOTON_AGREGAR_DEPARTAMENTO:
+
+			guardarNuevoDepartamento();
+
+			break;
+
+		case BOTON_ELIMINAR_DEPARTAMENTO:
 
 			eliminarDepartamento();
 
@@ -61,47 +69,68 @@ public class ControladorEventos implements ActionListener, MouseListener {
 
 		}
 		actualizarTabla();
-		limpiarInputs();
+		limpiar();
 	}
 
-	private void validarLogin() {
-		UsuarioDTO usuario = obtenerUsuarioInputs();
-		if (isUsuarioCamposValido(usuario) && existeUsuario(usuario)) {
-			// Mostramos la tabla al usuario
-			Inicio.tabla.show();
-			Inicio.admin.setVisible(false);
-			Inicio.admin.dispose();
-		}else{
-			InternalAdministrador.labelError.setText("Error, usuario o contraseña incorrectos.");
+	private void mostrarDepartamentos() {
+		// Volvemos a verificar que dicho usuario sea administrador
+
+		// Mostramos la ventana de departamentos si esta cerrada
+		if (!VentanaInicio.ventanaDepartamentos.isVisible()) {
+			VentanaInicio.ventanaDepartamentos.setVisible(true);
 		}
 
 	}
 
-	private void updateRegistro() {
+	private void validarLoginUsuario() {
+		usuarioActivo = obtenerUsuarioInputs();
+		if (isUsuarioCamposValido(usuarioActivo) && existeUsuario(usuarioActivo)) {
+			// Mostramos el panel de operaciones
+			VentanaInicio.panelAdministrador.show();
+			VentanaInicio.admin.setVisible(false);
+			VentanaInicio.admin.dispose();
+			usuarioActivo = usuarioService.findUsuario(usuarioActivo);
+			System.out.println("El usuario que maneja el sistema es: " + usuarioActivo);
+			if (usuarioService.isAdministrador(usuarioActivo)) {
+				activarAdministrador();
+			} else {
+				activarOperador();
+			}
+		} else {
+			InternalLogin.labelError.setText("Error, usuario o contraseña incorrectos.");
+		}
+
+	}
+
+	private void actualizarDepartamento() {
 		// Obtengo los campos de texto
 		DepartamentoDTO departamento = obtenerDepartamentoInputs();
 		// Verifico el contenido de los mismos
 		if (isDepartamentoValido(departamento)) {
 			try {
 				departamentoService.actualizar(departamento);
+				VentanaInicio.ventanaDepartamentos.labelCamposVacios.setText("");
 			} catch (Exception e) {
 
 				throw new RuntimeException("Error actualizando registro " + e);
 			}
 		} else {
-			System.out.println("No paso los requisitos campos vacios o nulos !!");
+			System.out.println("No cumple los requisitos");
+			// Si los campos a actualizar son vacios o nulos muestro un mensaje
+			// de error
+			VentanaInicio.ventanaDepartamentos.labelCamposVacios.setText("Error, no se puede actualizar un registro vacio.");
 		}
 
 	}
 
 	private void eliminarDepartamento() {
 		// Obtengo la fila seleccionada
-		int row = InternalTabla.tabla.getSelectedRow();
+		int row = InternalDepartamentos.tabla.getSelectedRow();
 		// Obtengo el campo fila,0 es decir el primer campo que corresponde al
 		// id
 
 		if (row >= 0) {
-			int idEliminar = (int) InternalTabla.tabla.getValueAt(row, 0);
+			int idEliminar = (int) InternalDepartamentos.tabla.getValueAt(row, 0);
 
 			try {
 				departamentoService.eliminar(idEliminar);
@@ -110,21 +139,21 @@ public class ControladorEventos implements ActionListener, MouseListener {
 				e.printStackTrace();
 			}
 		} else {
-			JOptionPane.showInternalMessageDialog(InternalTabla.panelInputs, "Debe seleccionar un registro", "Eliminar", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showInternalMessageDialog(InternalDepartamentos.panelInputs, "Debe seleccionar un registro", "Eliminar", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
 	/**
 	 * Crea una ventana desplegable que permite crear un departamento nuevo
 	 */
-	private void persistirDepartamento() {
+	private void guardarNuevoDepartamento() {
 
 		try {
-			ImageIcon icon = createImageIcon("/img/icon_add.png", "descricion");
+			ImageIcon icon = createImageIcon("/img/agregar_dto.png", "descricion");
 			JTextField txtNombre = new JTextField();
 			JTextField txtLocalidad = new JTextField();
 			Object[] campos = { "Nombre", txtNombre, "Localidad", txtLocalidad };
-			int r = JOptionPane.showConfirmDialog(InternalTabla.panelInputs, campos, "Agregar departamento", JOptionPane.OK_CANCEL_OPTION, 1, icon);
+			int r = JOptionPane.showConfirmDialog(InternalDepartamentos.panelInputs, campos, "Agregar departamento", JOptionPane.OK_CANCEL_OPTION, 1, icon);
 			DepartamentoDTO departamento = new DepartamentoDTO(0, txtNombre.getText(), txtLocalidad.getText());
 			if (r == JOptionPane.OK_OPTION && isDepartamentoValido(departamento)) {
 				departamentoService.insertar(departamento);
@@ -142,14 +171,14 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 */
 	private void manejarClickTabla() {
 
-		int row = InternalTabla.tabla.getSelectedRow();
-		InternalTabla.txtNumero.setText(String.valueOf(InternalTabla.tabla.getValueAt(row, 0)));
-		InternalTabla.txtNombre.setText((String) InternalTabla.tabla.getValueAt(row, 1));
-		InternalTabla.txtLocalidad.setText((String) InternalTabla.tabla.getValueAt(row, 2));
+		int row = InternalDepartamentos.tabla.getSelectedRow();
+		VentanaInicio.ventanaDepartamentos.txtNumero.setText(String.valueOf(InternalDepartamentos.tabla.getValueAt(row, 0)));
+		VentanaInicio.ventanaDepartamentos.txtNombre.setText((String) InternalDepartamentos.tabla.getValueAt(row, 1));
+		VentanaInicio.ventanaDepartamentos.txtLocalidad.setText((String) InternalDepartamentos.tabla.getValueAt(row, 2));
 
 		// Desactivo el campo del id del departamento ya que la clave unica no
 		// deberia modificarse
-		InternalTabla.txtNumero.setEditable(false);
+		VentanaInicio.ventanaDepartamentos.txtNumero.setEditable(false);
 	}
 
 	/**
@@ -159,10 +188,10 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 */
 	private DepartamentoDTO obtenerDepartamentoInputs() {
 		int id = 0;
-		if (!String.valueOf(InternalTabla.txtNumero.getText()).isEmpty())
-			id = Integer.parseInt(InternalTabla.txtNumero.getText());
-		String nombre = InternalTabla.txtNombre.getText();
-		String localidad = InternalTabla.txtLocalidad.getText();
+		if (!String.valueOf(VentanaInicio.ventanaDepartamentos.txtNumero.getText()).isEmpty())
+			id = Integer.parseInt(VentanaInicio.ventanaDepartamentos.txtNumero.getText());
+		String nombre = VentanaInicio.ventanaDepartamentos.txtNombre.getText();
+		String localidad = VentanaInicio.ventanaDepartamentos.txtLocalidad.getText();
 		return new DepartamentoDTO(id, nombre, localidad);
 	}
 
@@ -171,17 +200,17 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 * @return un nuevo usuario a partir de los campos ingresados
 	 */
 	private UsuarioDTO obtenerUsuarioInputs() {
-		UsuarioDTO usuario = new UsuarioDTO();
+		usuarioActivo = new UsuarioDTO();
 		try {
-		String nombre = InternalAdministrador.txtUsuario.getText();
-		String password = InternalAdministrador.txtPassword.getText();
-		String hashPassword = UHash.hash(password);
-		usuario.setNombre(nombre);
-		usuario.setPassword(hashPassword);
+			String nombre = InternalLogin.txtUsuario.getText();
+			String password = InternalLogin.txtPassword.getText();
+			String hashPassword = UHash.hash(password);
+			usuarioActivo.setNombre(nombre);
+			usuarioActivo.setPassword(hashPassword);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return usuario;
+		return usuarioActivo;
 	}
 
 	/**
@@ -210,10 +239,11 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 * Metodo que setea campos vacios limpiando los campos de texto
 	 */
 
-	private void limpiarInputs() {
-		InternalTabla.txtLocalidad.setText("");
-		InternalTabla.txtNombre.setText("");
-		InternalTabla.txtNumero.setText("");
+	private void limpiar() {
+		VentanaInicio.ventanaDepartamentos.txtLocalidad.setText("");
+		VentanaInicio.ventanaDepartamentos.txtNombre.setText("");
+		VentanaInicio.ventanaDepartamentos.txtNumero.setText("");
+//		VentanaInicio.ventanaDepartamentos.labelCamposVacios.setText("");
 
 	}
 
@@ -222,7 +252,7 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 */
 	private void actualizarTabla() {
 		DefaultTableModel modelo = UTabla.buildTableModel();
-		InternalTabla.tabla.setModel(modelo);
+		InternalDepartamentos.tabla.setModel(modelo);
 		modelo.fireTableDataChanged();
 
 	}
@@ -238,6 +268,28 @@ public class ControladorEventos implements ActionListener, MouseListener {
 			System.err.println("Couldn't find file: " + path);
 			return null;
 		}
+	}
+
+	/**
+	 * Desactiva los paneles de ganancias y reportes
+	 */
+	private void activarOperador() {
+
+		VentanaInicio.panelAdministrador.btnGanancias.setEnabled(false);
+		VentanaInicio.panelAdministrador.btnReportes.setEnabled(false);
+
+	}
+
+	/**
+	 * Activa todos los paneles para el control del administrador
+	 */
+	private void activarAdministrador() {
+
+		VentanaInicio.panelAdministrador.btnDepartamentos.setEnabled(true);
+		VentanaInicio.panelAdministrador.btnEmpleados.setEnabled(true);
+		VentanaInicio.panelAdministrador.btnGanancias.setEnabled(true);
+		VentanaInicio.panelAdministrador.btnReportes.setEnabled(true);
+
 	}
 
 	@Override
