@@ -1,5 +1,7 @@
 package com.empresa.vistas;
 
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -20,6 +22,9 @@ import com.empresa.util.UTabla;
 
 public class ControladorEventos implements ActionListener, MouseListener {
 
+	// Declaracion de constantes que son los eventos que genera el usuario
+	public static final String MENU_ABRIR_PANEL = "Abrir";
+	public static final String MENU_CERRAR_PANEL = "Cerrar";
 	public static final String BOTON_ACTUALIZAR_DEPARTAMENTO = "Actualizar Departamento";
 	public static final String BOTON_ELIMINAR_DEPARTAMENTO = "Eliminar Departamento";
 	public static final String BOTON_AGREGAR_DEPARTAMENTO = "Nuevo Departamento";
@@ -27,6 +32,7 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	public static final String BOTON_MOSTRAR_DEPARTAMENTOS = "btnAdminDepartamentos";
 	private static UsuarioDTO usuarioActivo = new UsuarioDTO();
 
+	// Servicios para realizar las acciones sobre la base de datos
 	private DepartamentoDAO departamentoService = (DepartamentoDAO) UFactory.getInstancia("DEPT");
 	private UsuarioDAO usuarioService = (UsuarioDAO) UFactory.getInstancia("USR");
 
@@ -64,32 +70,63 @@ public class ControladorEventos implements ActionListener, MouseListener {
 			eliminarDepartamento();
 
 			break;
-		default:
-			throw new UnsupportedOperationException("No se reconocio el evento: " + evento);
 
+		case MENU_ABRIR_PANEL:
+
+			mostrarPanelControl();
+
+			break;
+		default:
+			JOptionPane.showInternalMessageDialog(VentanaInicio.escritorio, "La función " + evento + " no se encuentra disponible", "Operacion no identificada", JOptionPane.ERROR_MESSAGE);
 		}
 		actualizarTabla();
 		limpiar();
 	}
 
+	/**
+	 * Metodo que abre la ventana interna de departamentos si es que esta
+	 * cerrada
+	 */
 	private void mostrarDepartamentos() {
-		// Volvemos a verificar que dicho usuario sea administrador
-
-		// Mostramos la ventana de departamentos si esta cerrada
 		if (!VentanaInicio.ventanaDepartamentos.isVisible()) {
 			VentanaInicio.ventanaDepartamentos.setVisible(true);
 		}
 
 	}
 
+	/**
+	 * Metodo que valida los datos ingresados por el usuario en su login y de
+	 * ser un usuario correcto habilita el panel de administracion activando las
+	 * funciones que le corresponda segun su cargo
+	 */
 	private void validarLoginUsuario() {
 		usuarioActivo = obtenerUsuarioInputs();
 		if (isUsuarioCamposValido(usuarioActivo) && existeUsuario(usuarioActivo)) {
+			// Ejecutamos un sonido de bienvenida
+			new HiloSonido().start();
 			// Mostramos el panel de operaciones
-			VentanaInicio.panelAdministrador.show();
-			VentanaInicio.admin.setVisible(false);
-			VentanaInicio.admin.dispose();
-			usuarioActivo = usuarioService.findUsuario(usuarioActivo);
+			VentanaInicio.ventanaLogin.setVisible(false);
+			VentanaInicio.ventanaLogin.dispose();
+			mostrarPanelControl();
+		} else {
+			InternalLogin.labelError.setText("Error, usuario o contraseña incorrectos.");
+		}
+
+	}
+
+	/**
+	 * Metodo que muestra la ventana interna del panel de control dependiendo si
+	 * el usuario se logeo y de su nivel de usuario habilita o desactiva
+	 * funciones
+	 */
+	private void mostrarPanelControl() {
+
+		// Buscamos al usuario que esta usando el sistema y lo dejamos en
+		// memoria
+		usuarioActivo = usuarioService.findUsuario(usuarioActivo);
+		if (usuarioActivo != null) {
+			if (!VentanaInicio.panelControl.isVisible())
+				VentanaInicio.panelControl.show();
 			System.out.println("El usuario que maneja el sistema es: " + usuarioActivo);
 			if (usuarioService.isAdministrador(usuarioActivo)) {
 				activarAdministrador();
@@ -97,11 +134,14 @@ public class ControladorEventos implements ActionListener, MouseListener {
 				activarOperador();
 			}
 		} else {
-			InternalLogin.labelError.setText("Error, usuario o contraseña incorrectos.");
+			JOptionPane.showInternalMessageDialog(VentanaInicio.escritorio, "Debe iniciar sesión, antes de manejar el sistema", "Usuario no identificado", JOptionPane.WARNING_MESSAGE);
 		}
 
 	}
 
+	/**
+	 * Metodo que obtiene los datos de los campos de texto y los actualiza
+	 */
 	private void actualizarDepartamento() {
 		// Obtengo los campos de texto
 		DepartamentoDTO departamento = obtenerDepartamentoInputs();
@@ -122,7 +162,10 @@ public class ControladorEventos implements ActionListener, MouseListener {
 		}
 
 	}
-
+	/**
+	 * Metodo que elimina un departamento seleccionado
+	 * a partir de la tabla por el usuario
+	 */
 	private void eliminarDepartamento() {
 		// Obtengo la fila seleccionada
 		int row = InternalDepartamentos.tabla.getSelectedRow();
@@ -182,9 +225,9 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	}
 
 	/**
-	 * Metodo que recoge los campos de texto y los parsea en un departamento
+	 * Metodo que recoge los campos de texto y los convierte en un departamento
 	 * 
-	 * @return departamento
+	 * @return nuevo departamento
 	 */
 	private DepartamentoDTO obtenerDepartamentoInputs() {
 		int id = 0;
@@ -197,7 +240,7 @@ public class ControladorEventos implements ActionListener, MouseListener {
 
 	/**
 	 * 
-	 * @return un nuevo usuario a partir de los campos ingresados
+	 * @return un nuevo usuario a partir de los campos ingresados del login
 	 */
 	private UsuarioDTO obtenerUsuarioInputs() {
 		usuarioActivo = new UsuarioDTO();
@@ -243,7 +286,7 @@ public class ControladorEventos implements ActionListener, MouseListener {
 		VentanaInicio.ventanaDepartamentos.txtLocalidad.setText("");
 		VentanaInicio.ventanaDepartamentos.txtNombre.setText("");
 		VentanaInicio.ventanaDepartamentos.txtNumero.setText("");
-//		VentanaInicio.ventanaDepartamentos.labelCamposVacios.setText("");
+		// VentanaInicio.ventanaDepartamentos.labelCamposVacios.setText("");
 
 	}
 
@@ -251,7 +294,7 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 * Actualiza la tabla obteniendo los registros desde la base de datos
 	 */
 	private void actualizarTabla() {
-		DefaultTableModel modelo = UTabla.buildTableModel();
+		DefaultTableModel modelo = UTabla.buildTableModel("departamento", new String[] { "Número", "Nombre", "Localidad" });
 		InternalDepartamentos.tabla.setModel(modelo);
 		modelo.fireTableDataChanged();
 
@@ -272,11 +315,12 @@ public class ControladorEventos implements ActionListener, MouseListener {
 
 	/**
 	 * Desactiva los paneles de ganancias y reportes
+	 * para el uso del operador
 	 */
 	private void activarOperador() {
 
-		VentanaInicio.panelAdministrador.btnGanancias.setEnabled(false);
-		VentanaInicio.panelAdministrador.btnReportes.setEnabled(false);
+		VentanaInicio.panelControl.btnGanancias.setEnabled(false);
+		VentanaInicio.panelControl.btnReportes.setEnabled(false);
 
 	}
 
@@ -285,10 +329,10 @@ public class ControladorEventos implements ActionListener, MouseListener {
 	 */
 	private void activarAdministrador() {
 
-		VentanaInicio.panelAdministrador.btnDepartamentos.setEnabled(true);
-		VentanaInicio.panelAdministrador.btnEmpleados.setEnabled(true);
-		VentanaInicio.panelAdministrador.btnGanancias.setEnabled(true);
-		VentanaInicio.panelAdministrador.btnReportes.setEnabled(true);
+		VentanaInicio.panelControl.btnDepartamentos.setEnabled(true);
+		VentanaInicio.panelControl.btnEmpleados.setEnabled(true);
+		VentanaInicio.panelControl.btnGanancias.setEnabled(true);
+		VentanaInicio.panelControl.btnReportes.setEnabled(true);
 
 	}
 
@@ -319,4 +363,19 @@ public class ControladorEventos implements ActionListener, MouseListener {
 
 	}
 
+	/**
+	 *Clase que permite ejecutar un sonido 
+	 * cuando el usuario hace su logeo
+	 */
+	class HiloSonido extends Thread {
+		public void run() {
+			try {
+				AudioClip audio;
+				audio = Applet.newAudioClip(getClass().getResource("/audio/vista.wav"));
+				audio.play();
+			} catch (Exception e) {
+				System.out.println("Error ejecutando sonido " + e);
+			}
+		}
+	}
 }

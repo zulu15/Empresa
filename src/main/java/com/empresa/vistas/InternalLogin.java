@@ -34,13 +34,13 @@ public class InternalLogin extends javax.swing.JInternalFrame {
         txtUsuario = new javax.swing.JTextField();
         labelPassword = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
-        btnIngresar = new javax.swing.JButton();
+        btnIngresar = new javax.swing.JButton("Iniciar");
         labelError = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(133, 128, 184));
         setClosable(true);
         setIconifiable(true);
-        setMaximizable(true);
+        setMaximizable(false);
         setResizable(true);
         setTitle("Inicio ");
 

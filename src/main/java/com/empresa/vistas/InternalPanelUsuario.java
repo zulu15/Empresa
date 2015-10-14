@@ -54,10 +54,11 @@ public class InternalPanelUsuario extends javax.swing.JInternalFrame {
         menuPerfil = new javax.swing.JMenuItem();
         jMenu5 = new javax.swing.JMenu();
         btnPantallaTamaño = new javax.swing.JMenuItem();
-
+        
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
         setClosable(true);
         setIconifiable(true);
-        setMaximizable(true);
+        setMaximizable(false);
         setResizable(true);
         setTitle("Panel de control");
 

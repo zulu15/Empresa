@@ -70,82 +70,68 @@ public class UsuarioImpl implements UsuarioDAO {
 	}
 
 	@Override
-	public UsuarioDTO findUsuario(int id) {
-		UsuarioDTO usuarioEncontrado = null;
-		PreparedStatement pstm = null;
-		ResultSet resultado = null;
-		try {
-			String sql = "SELECT * FROM usuario WHERE id = ?";
-			pstm = conexion.prepareStatement(sql);
-			pstm.setInt(1, id);
-			resultado = pstm.executeQuery();
-			while (resultado.next()) {
-				usuarioEncontrado = new UsuarioDTO();
-				usuarioEncontrado.setId(resultado.getLong("id"));
-				usuarioEncontrado.setNombre(resultado.getString("nombre"));
-				usuarioEncontrado.setPassword(resultado.getString("password"));
-				usuarioEncontrado.setAcceso(resultado.getInt("acceso"));
-			}
-
-		} catch (Exception e) {
-			throw new RuntimeException("Error buscando el usuario con id" + id + " -- " + e);
-		} finally {
-			try {
-				if (resultado != null)
-					resultado.close();
-				if (pstm != null)
-					pstm.close();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}
-
-		return usuarioEncontrado;
-	}
-
-	@Override
 	public UsuarioDTO findUsuario(UsuarioDTO usuario) {
 		UsuarioDTO usuarioEncontrado = null;
 		PreparedStatement pstm = null;
 		ResultSet resultado = null;
-		try {
-			String sql = "SELECT * FROM usuario WHERE password = ? AND nombre = ?";
-			pstm = conexion.prepareStatement(sql);
-			pstm.setString(1, usuario.getPassword());
-			pstm.setString(2, usuario.getNombre());
-			resultado = pstm.executeQuery();
-			while (resultado.next()) {
-				usuarioEncontrado = new UsuarioDTO();
-				usuarioEncontrado.setId(resultado.getLong("id"));
-				usuarioEncontrado.setNombre(resultado.getString("nombre"));
-				usuarioEncontrado.setPassword(resultado.getString("password"));
-				usuarioEncontrado.setAcceso(resultado.getInt("acceso"));
-			}
-
-		} catch (Exception e) {
-			throw new RuntimeException("Error buscando el usuario " + usuario + " -- " + e);
-		} finally {
+		if (usuario != null) {
 			try {
-				if (resultado != null)
-					resultado.close();
-				if (pstm != null)
-					pstm.close();
-			} catch (Exception e2) {
-				e2.printStackTrace();
+				String sql = "SELECT * FROM usuario WHERE password = ? AND nombre = ?";
+				pstm = conexion.prepareStatement(sql);
+				pstm.setString(1, usuario.getPassword());
+				pstm.setString(2, usuario.getNombre());
+				resultado = pstm.executeQuery();
+				while (resultado.next()) {
+					usuarioEncontrado = new UsuarioDTO();
+					usuarioEncontrado.setId(resultado.getLong("id"));
+					usuarioEncontrado.setNombre(resultado.getString("nombre"));
+					usuarioEncontrado.setPassword(resultado.getString("password"));
+					usuarioEncontrado.setAcceso(resultado.getInt("acceso"));
+				}
+
+			} catch (Exception e) {
+				throw new RuntimeException("Error buscando el usuario " + usuario + " -- " + e);
+			} finally {
+				try {
+					if (resultado != null)
+						resultado.close();
+					if (pstm != null)
+						pstm.close();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
 			}
 		}
 		return usuarioEncontrado;
 	}
 
 	public static void main(String a[]) {
-		
-		
+
 		UsuarioDAO service = (UsuarioDAO) UFactory.getInstancia("USR");
 		UsuarioDTO usuarioPrueba = new UsuarioDTO(1, "joaquin", "c2f6d50c988c8320a487587a9eb44e77", 1);
-		
-
 
 	}
-	
+
+	/*
+	 * 
+	 * 
+	 * @Override public UsuarioDTO findUsuario(int id) { UsuarioDTO
+	 * usuarioEncontrado = null; PreparedStatement pstm = null; ResultSet
+	 * resultado = null; try { String sql =
+	 * "SELECT * FROM usuario WHERE id = ?"; pstm =
+	 * conexion.prepareStatement(sql); pstm.setInt(1, id); resultado =
+	 * pstm.executeQuery(); while (resultado.next()) { usuarioEncontrado = new
+	 * UsuarioDTO(); usuarioEncontrado.setId(resultado.getLong("id"));
+	 * usuarioEncontrado.setNombre(resultado.getString("nombre"));
+	 * usuarioEncontrado.setPassword(resultado.getString("password"));
+	 * usuarioEncontrado.setAcceso(resultado.getInt("acceso")); }
+	 * 
+	 * } catch (Exception e) { throw new
+	 * RuntimeException("Error buscando el usuario con id" + id + " -- " + e); }
+	 * finally { try { if (resultado != null) resultado.close(); if (pstm !=
+	 * null) pstm.close(); } catch (Exception e2) { e2.printStackTrace(); } }
+	 * 
+	 * return usuarioEncontrado; }
+	 */
 
 }

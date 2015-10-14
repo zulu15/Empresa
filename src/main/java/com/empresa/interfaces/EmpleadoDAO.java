@@ -6,5 +6,6 @@ import com.empresa.beans.EmpleadoDTO;
 
 public interface EmpleadoDAO {
 	public Collection<EmpleadoDTO> buscarXDepartamento(int deptno);
+	
 
 }

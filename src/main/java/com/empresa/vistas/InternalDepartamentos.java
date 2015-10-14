@@ -63,13 +63,13 @@ public class InternalDepartamentos extends javax.swing.JInternalFrame {
 		// Atributos de redimension del InternalFrame
 		setClosable(true);
 		setIconifiable(true);
-		setMaximizable(true);
+		setMaximizable(false);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 		scrollista.setToolTipText("");
 
-		tabla.setModel(UTabla.buildTableModel());
+		tabla.setModel(UTabla.buildTableModel("departamento"));
 		scrollista.setViewportView(tabla);
 		if (tabla.getColumnModel().getColumnCount() > 0) {
 			tabla.getColumnModel().getColumn(0).setResizable(false);
